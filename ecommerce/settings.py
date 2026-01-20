@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -20,12 +21,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-$wpvd@g^l0e-p7751*pa@ri%xd7(4&^*gxco3v_f@xxn&6aal6'
+SECRET_KEY = os.environ.get(
+    "SECRET_KEY",
+    "django-insecure-$wpvd@g^l0e-p7751*pa@ri%xd7(4&^*gxco3v_f@xxn&6aal6",
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "1") == "1"
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
+
+# For Vercel deployments (Django requires scheme in trusted origins)
+CSRF_TRUSTED_ORIGINS = [
+    o.strip()
+    for o in os.environ.get("CSRF_TRUSTED_ORIGINS", "https://*.vercel.app").split(",")
+    if o.strip()
+]
 
 
 # Application definition
@@ -82,6 +93,13 @@ DATABASES = {
     }
 }
 
+# Optional: use Postgres/MySQL/etc in production by setting DATABASE_URL
+# Example (Postgres): postgres://user:pass@host:5432/dbname
+if os.environ.get("DATABASE_URL"):
+    import dj_database_url
+
+    DATABASES["default"] = dj_database_url.config(conn_max_age=600, ssl_require=True)
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -124,6 +142,13 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'store:product_list'
 LOGOUT_REDIRECT_URL = 'store:product_list'
+
+# Vercel + SQLite note:
+# - Vercel filesystem is read-only at runtime, so SQLite writes will fail.
+# - DB-backed sessions try to write on many requests, so use cookie sessions by default.
+SESSION_ENGINE = os.environ.get(
+    "SESSION_ENGINE", "django.contrib.sessions.backends.signed_cookies"
+)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
