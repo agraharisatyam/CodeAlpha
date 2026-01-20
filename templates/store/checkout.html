@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout · SimpleStore{% endblock %}
+
+{% block content %}
+  <div class="pagehead">
+    <h1>Checkout</h1>
+    <p class="muted">This creates an Order + OrderItems in the database.</p>
+  </div>
+
+  <div class="split">
+    <div class="panel">
+      <h2>Shipping details</h2>
+      <form method="post" class="form">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button class="btn" type="submit">Place order</button>
+      </form>
+    </div>
+    <div class="panel">
+      <h2>Summary</h2>
+      <div class="summary__row">
+        <span class="muted">Subtotal</span>
+        <span class="summary__total">${{ subtotal }}</span>
+      </div>
+      <p class="muted">Payments are not implemented in this demo (order stays “pending”).</p>
+      <a class="btn btn--ghost" href="{% url 'store:cart' %}">Back to cart</a>
+    </div>
+  </div>
+{% endblock %}
+

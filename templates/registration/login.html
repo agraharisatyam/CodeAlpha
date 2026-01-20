@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Login · SimpleStore{% endblock %}
+
+{% block content %}
+  <div class="pagehead">
+    <h1>Login</h1>
+    <p class="muted">Use your account to checkout and view orders.</p>
+  </div>
+
+  <div class="panel panel--narrow">
+    <form method="post" class="form">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button class="btn" type="submit">Login</button>
+    </form>
+    <p class="muted">
+      No account?
+      <a href="{% url 'store:register' %}">Register</a>
+    </p>
+  </div>
+{% endblock %}
+

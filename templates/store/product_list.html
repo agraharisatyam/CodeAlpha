@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Products · SimpleStore{% endblock %}
+
+{% block content %}
+  <div class="pagehead">
+    <h1>Products</h1>
+    <p class="muted">Click a product to see details. Add items to your cart, then checkout.</p>
+  </div>
+
+  <div class="grid">
+    {% for p in products %}
+      <div class="card">
+        <a class="card__title" href="{% url 'store:product_detail' p.pk %}">{{ p.name }}</a>
+        <div class="card__price">${{ p.price }}</div>
+        {% if p.image_url %}
+          <img class="card__img" src="{{ p.image_url }}" alt="{{ p.name }}" loading="lazy" />
+        {% else %}
+          <div class="card__img card__img--placeholder">No image</div>
+        {% endif %}
+        <form action="{% url 'store:cart_add' p.pk %}" method="post">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{% url 'store:product_list' %}" />
+          <button class="btn" type="submit">Add to cart</button>
+        </form>
+      </div>
+    {% empty %}
+      <p>No products yet. Add some in the admin.</p>
+    {% endfor %}
+  </div>
+{% endblock %}
+

@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Cart · SimpleStore{% endblock %}
+
+{% block content %}
+  <div class="pagehead">
+    <h1>Your cart</h1>
+    <p class="muted">Cart is stored in your session (server-side). Orders are stored in the database.</p>
+  </div>
+
+  {% if items %}
+    <div class="table">
+      <div class="table__row table__head">
+        <div>Product</div>
+        <div>Qty</div>
+        <div>Line total</div>
+        <div></div>
+      </div>
+      {% for it in items %}
+        <div class="table__row">
+          <div>
+            <a href="{% url 'store:product_detail' it.product.pk %}">{{ it.product.name }}</a>
+            <div class="muted">${{ it.product.price }} each</div>
+          </div>
+          <div class="qty">
+            <span class="qty__num">{{ it.quantity }}</span>
+          </div>
+          <div><strong>${{ it.line_total }}</strong></div>
+          <div class="table__actions">
+            <form action="{% url 'store:cart_add' it.product.pk %}" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{% url 'store:cart' %}" />
+              <button class="btn btn--sm" type="submit">+</button>
+            </form>
+            <form action="{% url 'store:cart_remove' it.product.pk %}" method="post" data-confirm="Remove one item?">
+              {% csrf_token %}
+              <button class="btn btn--sm btn--ghost" type="submit">−</button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="summary">
+      <div class="summary__row">
+        <span class="muted">Subtotal</span>
+        <span class="summary__total">${{ subtotal }}</span>
+      </div>
+      <div class="row">
+        <a class="btn btn--ghost" href="{% url 'store:product_list' %}">Continue shopping</a>
+        {% if user.is_authenticated %}
+          <a class="btn" href="{% url 'store:checkout' %}">Checkout</a>
+        {% else %}
+          <a class="btn" href="{% url 'login' %}?next={% url 'store:checkout' %}">Login to checkout</a>
+        {% endif %}
+      </div>
+    </div>
+  {% else %}
+    <p>Your cart is empty.</p>
+    <a class="btn" href="{% url 'store:product_list' %}">Browse products</a>
+  {% endif %}
+{% endblock %}
+

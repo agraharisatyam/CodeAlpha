@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Order #{{ order.pk }} · SimpleStore{% endblock %}
+
+{% block content %}
+  <div class="pagehead">
+    <h1>Order #{{ order.pk }}</h1>
+    <p class="muted">Status: {{ order.get_status_display }} · Placed: {{ order.created_at }}</p>
+  </div>
+
+  <div class="panel">
+    <h2>Shipping</h2>
+    <p><strong>{{ order.full_name }}</strong></p>
+    <p class="muted">{{ order.email }}</p>
+    <pre class="address">{{ order.address }}</pre>
+  </div>
+
+  <div class="panel">
+    <h2>Items</h2>
+    <div class="table">
+      <div class="table__row table__head">
+        <div>Product</div>
+        <div>Qty</div>
+        <div>Total</div>
+      </div>
+      {% for item in order.items.all %}
+        <div class="table__row">
+          <div>{{ item.product.name }}</div>
+          <div>{{ item.quantity }}</div>
+          <div><strong>${{ item.line_total }}</strong></div>
+        </div>
+      {% endfor %}
+    </div>
+    <div class="summary__row">
+      <span class="muted">Order total</span>
+      <span class="summary__total">${{ order.total }}</span>
+    </div>
+  </div>
+
+  <a class="btn" href="{% url 'store:product_list' %}">Back to store</a>
+{% endblock %}
+
